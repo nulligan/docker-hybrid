@@ -1,0 +1,36 @@
+# https://docs.docker.com/compose/compose-file/
+
+# 100.64.0.8/30 100.64.64.192/26
+
+version: "3.8"
+
+networks:
+  hub_default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.0.8/30
+  mysql:
+    external:
+      name: hb_services_anope
+
+services:
+  services:
+    restart: unless-stopped
+    hostname: s3rv1c3z.n3tw3rk.1ns3cur1ty.c0rp
+    image: anope/anope:latest
+    environment:
+      LANG: en_US.utf8
+      TZ: UTC
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    networks:
+      hub_default:
+        ipv4_address: 100.64.0.10
+      mysql:
+        ipv4_address: 100.64.64.131
+    volumes:
+      - ../config/anope:/anope/conf:ro

@@ -1,0 +1,39 @@
+# 100.64.0.4/30 100.64.64.128/26
+
+version: "2.4"
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.0.4/30
+  anope:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.64.128/29
+
+services:
+  mysql:
+    restart: unless-stopped
+    hostname: mysql
+    domainname: mysql.n3tw3rk.1ns3cur1ty.c0rp
+    image: mariadb:latest
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    networks:
+      default:
+        ipv4_address: 100.64.0.2
+      anope:
+        ipv4_address: 100.64.64.130
+    volumes:
+      - mysql_data:/var/lib/mysql:rw
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+
+volumes:
+  mysql_data:

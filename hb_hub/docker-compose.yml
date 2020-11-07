@@ -61,7 +61,7 @@ services:
       context: ../hybrid
       dockerfile: Dockerfile
     image: hybrid:latest
-    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid  -configfile /usr/local/ircd/etc/ircd.conf -logfile /dev/stdout"
+    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid -configfile /usr/local/ircd/etc/ircd.conf -logfile /dev/stdout"
     environment:
       LANG: en_US.utf8
       TZ: UTC
@@ -93,7 +93,7 @@ services:
         target: /usr/local/ircd/var
         volume:
           nocopy: false
-      - ../etc/:/usr/local/ircd/etc/hb_conf:ro
+      - ../config/hybrid:/usr/local/ircd/etc/hb_conf:ro
       - ./ircd.conf:/usr/local/ircd/etc/ircd.conf:ro
 
 volumes:

@@ -1,0 +1,5 @@
+user     = postfix
+password = 
+hosts    = 100.64.64.138
+dbname   = postfixadmin
+query    = SELECT goto FROM alias WHERE address='%s' AND active = '1'

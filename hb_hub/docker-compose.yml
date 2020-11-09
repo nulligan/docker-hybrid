@@ -52,6 +52,12 @@ networks:
       config:
         - subnet: 100.64.64.48/29
     internal: true
+  tor_edge_leaf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.64.56/29
+    internal: true
 
 services:
   hub:
@@ -61,7 +67,7 @@ services:
       context: ../hybrid
       dockerfile: Dockerfile
     image: hybrid:latest
-    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid -configfile /usr/local/ircd/etc/ircd.conf -logfile /dev/stdout"
+    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid -configfile /usr/local/ircd/etc/hb_conf/hub.conf -logfile /dev/stdout"
     environment:
       LANG: en_US.utf8
       TZ: UTC
@@ -87,14 +93,15 @@ services:
         ipv4_address: 100.64.64.42
       console:
         ipv4_address: 100.64.64.50
+      tor_edge_leaf:
+        ipv4_address: 100.64.64.58
     volumes:
       - type: volume
-        source: hb_hub_ephemeral
+        source: ephemeral
         target: /usr/local/ircd/var
         volume:
           nocopy: false
       - ../config/hybrid:/usr/local/ircd/etc/hb_conf:ro
-      - ./ircd.conf:/usr/local/ircd/etc/ircd.conf:ro
 
 volumes:
-  hb_hub_ephemeral:
+  ephemeral:

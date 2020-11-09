@@ -1,0 +1,17 @@
+compatibility_level                 = 2
+command_directory                   = /usr/sbin
+daemon_directory                    = /usr/lib/postfix/sbin
+data_directory                      = /var/lib/postfix
+unknown_local_recipient_reject_code = 550
+mynetworks                          = 127.0.0.0/8
+smtpd_banner                        = $myhostname ESMTP $mail_name (n3tw3rk 1ns3cur1ty c0rp0r4t10n)
+debugger_command                    = PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin ddd $daemon_directory/$process_name $process_id & sleep 5
+sendmail_path                       =
+newaliases_path                     =
+mailq_path                          =
+setgid_group                        =
+html_directory                      =
+manpage_directory                   =
+sample_directory                    =
+readme_directory                    =
+inet_protocols                      = ipv4

@@ -1,0 +1,50 @@
+version: "3.8"
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 198.18.55.8/30
+  hub:
+    external:
+      name: rb_hub_edge_leaf
+  console:
+    external:
+      name: rb_console_edge
+  tor:
+    external:
+      name: rb_tor_edge_leaf
+
+services:
+  edge:
+    restart: unless-stopped
+    hostname: edge
+    domainname: netwerk.insecurity.corp
+    userns_mode: "host"
+    build:
+      context: ../ratbox
+      dockerfile: Dockerfile
+    image: ratbox:latest
+    command: "/usr/local/ircd/bin/ircd -pidfile /run/ircd.pid -foreground || /usr/local/ircd/bin/ircd -conftest"
+    environment:
+      LANG: en_US.utf8
+      TZ: UTC
+      NICK_LEN: 32
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    networks:
+      default:
+        ipv4_address: 198.18.55.10
+      hub:
+        ipv4_address: 198.18.70.27
+      console:
+        ipv4_address: 198.18.70.42
+    volumes:
+      - ../etc/:/usr/local/ircd/etc:rw
+      - ./edge.conf:/usr/local/ircd/etc/ircd.conf:ro
+      - ../ephemeral/logs:/usr/local/ircd/logs:rw
+      - ../ephemeral/db:/usr/local/ircd/ephemeral/db:rw

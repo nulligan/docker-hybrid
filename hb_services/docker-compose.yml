@@ -16,6 +16,10 @@ networks:
   hub:
     external:
       name: hb_hub_services
+  smtp:
+    external:
+      name: hb_postfix_anope
+  
 
 services:
   services:
@@ -37,13 +41,15 @@ services:
         ipv4_address: 100.64.64.131
       hub:
         ipv4_address: 100.64.64.35
+      smtp:
+        ipv4_address: 100.64.65.67
     volumes:      
       - type: volume
-        source: hb_services_ephemeral
+        source: ephemeral
         target: /anope/data
         volume:
           nocopy: false
       - ../config/anope:/anope/conf:ro
 
 volumes:
-  hb_services_ephemeral:
+  ephemeral:

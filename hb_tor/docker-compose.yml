@@ -1,0 +1,59 @@
+# https://docs.docker.com/compose/compose-file/
+
+# 100.64.48.0/30 100.64.65.0/26
+
+version: "3.8"
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.48.0/30
+  leaf:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.65.0/29
+    internal: true
+  hub:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.65.12/29
+    internal: true
+  
+services:
+  tor:
+    restart: unless-stopped
+    hostname: t0r.n3tw3rk.1ns3cur1ty.c0rp
+    build:
+      context: ../tor
+      dockerfile: Dockerfile
+    image: tor:latest
+    command: "tor -f /tor/configs/torrc"
+    environment:
+      LANG: en_US.utf8
+      TZ: UTC
+    networks:
+      default:
+        ipv4_address: 100.64.48.2
+      leaf:
+        ipv4_address: 100.64.65.2
+      hub:
+        ipv4_address: 100.64.65.14
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    volumes:
+      - type: volume
+        source: ephemeral
+        target: /var/lib/tor
+        volume:
+          nocopy: false
+      - ../config/tor/torrc:/tor/configs/torrc:ro
+
+volumes:
+  ephemeral:

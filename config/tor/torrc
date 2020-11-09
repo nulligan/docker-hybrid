@@ -2,7 +2,7 @@ RunAsDaemon                   0
 
 SocksPort                     0
 
-DNSPort                       0
+DNSPort                       5353
 
 TransPort                     0
 
@@ -12,4 +12,4 @@ HiddenServicePort             6667 100.64.65.3:6667
 
 HiddenServiceDir              /var/lib/tor/hub_6667/
 
-HiddenServicePort             6667 100.64.65.15:6667
+HiddenServicePort             6667 100.64.65.11:6667

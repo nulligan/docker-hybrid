@@ -47,6 +47,7 @@ services:
       hub:
         ipv4_address: 100.64.64.59
       tor:
+        ipv4_address: 100.64.65.11
     volumes:
       - type: volume
         source: ephemeral

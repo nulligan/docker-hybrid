@@ -20,7 +20,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 100.64.65.12/29
+        - subnet: 100.64.65.8/29
     internal: true
   
 services:
@@ -41,7 +41,7 @@ services:
       leaf:
         ipv4_address: 100.64.65.2
       hub:
-        ipv4_address: 100.64.65.14
+        ipv4_address: 100.64.65.10
     ulimits:
       nproc: 65535
       nofile:

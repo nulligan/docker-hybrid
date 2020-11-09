@@ -1,6 +1,6 @@
 # https://docs.docker.com/compose/compose-file/
 
-# 100.64.48.8/30 100.64.65.160/27
+# 100.64.0.16/30 100.64.66.0/27
 
 version: "3.8"
 
@@ -9,26 +9,28 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 100.64.48.8/30
+        - subnet: 100.64.0.16/30
   console:
     ipam:
       driver: default
       config:
-        - subnet: 100.64.65.160/29
-    internal: true
+        - subnet: 100.64.66.0/29
   hub:
     external:
-      name: hb_hub_general_leaf
+      name: hb_hub_tor_edge_hub
+  tor:
+    external:
+      name: hb_tor_hub
 
 services:
-  general:
+  edge:
     restart: unless-stopped
-    hostname: g3n3r4l.n3tw3rk.1ns3cur1ty.c0rp
+    hostname: t0r-3dg3.n3tw3rk.1ns3cur1ty.c0rp
     build:
       context: ../hybrid
       dockerfile: Dockerfile
     image: hybrid:latest
-    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid -configfile /usr/local/ircd/etc/hb_conf/general.conf -logfile /dev/stdout"
+    command: "/usr/local/ircd/bin/ircd -foreground -pidfile /dev/shm/ircd.pid -configfile /usr/local/ircd/etc/hb_conf/tor-edge.conf -logfile /dev/stdout"
     environment:
       LANG: en_US.utf8
       TZ: UTC
@@ -39,11 +41,13 @@ services:
         hard: 1024000
     networks:
       default:
-        ipv4_address: 100.64.48.10
+        ipv4_address: 100.64.0.18
       console:
-        ipv4_address: 100.64.65.162
+        ipv4_address: 100.64.66.2
       hub:
-        ipv4_address: 100.64.64.3
+        ipv4_address: 100.64.64.59
+      tor:
+        ipv4_address: 100.64.65.15
     volumes:
       - type: volume
         source: ephemeral
@@ -54,4 +58,3 @@ services:
 
 volumes:
   ephemeral:
-    

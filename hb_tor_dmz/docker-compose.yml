@@ -9,7 +9,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 100.64.0.14
+        - subnet: 100.64.0.12/30
   console:
     ipam:
       driver: default
@@ -20,7 +20,7 @@ networks:
       name: hb_hub_tor_leaf
   tor:
     external:
-      name: hb_tor_tor_leaf
+      name: hb_tor_leaf
 
 services:
   tor_dmz:
@@ -41,7 +41,7 @@ services:
         hard: 1024000
     networks:
       default:
-        ipv4_address: 100.64.0.16
+        ipv4_address: 100.64.0.14
       console:
         ipv4_address: 100.64.65.130
       hub:

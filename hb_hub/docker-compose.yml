@@ -28,7 +28,7 @@ networks:
       config:
         - subnet: 100.64.64.16/29
     internal: true
-  edge_leaf:
+  edge_hub:
     ipam:
       driver: default
       config:
@@ -52,7 +52,7 @@ networks:
       config:
         - subnet: 100.64.64.48/29
     internal: true
-  tor_edge_leaf:
+  tor_edge_hub:
     ipam:
       driver: default
       config:
@@ -85,7 +85,7 @@ services:
         ipv4_address: 100.64.64.10
       proxy_leaf:
         ipv4_address: 100.64.64.18
-      edge_leaf:
+      edge_hub:
         ipv4_address: 100.64.64.26
       services:
         ipv4_address: 100.64.64.34
@@ -93,7 +93,7 @@ services:
         ipv4_address: 100.64.64.42
       console:
         ipv4_address: 100.64.64.50
-      tor_edge_leaf:
+      tor_edge_hub:
         ipv4_address: 100.64.64.58
     volumes:
       - type: volume

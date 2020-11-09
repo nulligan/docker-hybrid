@@ -17,14 +17,13 @@ networks:
 services:
   mysql:
     restart: unless-stopped
-    hostname: mysql
-    domainname: mysql.n3tw3rk.1ns3cur1ty.c0rp
+    hostname: mysql.mysql.n3tw3rk.1ns3cur1ty.c0rp
     image: mariadb:latest
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     networks:
       default:
-        ipv4_address: 100.64.0.2
+        ipv4_address: 100.64.0.6
       anope:
         ipv4_address: 100.64.64.130
     volumes:

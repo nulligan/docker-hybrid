@@ -12,7 +12,10 @@ networks:
         - subnet: 100.64.0.8/30
   mysql:
     external:
-      name: hb_services_anope
+      name: hb_mysql_anope
+  hub:
+    external:
+      name: hb_hub_services
 
 services:
   services:
@@ -32,5 +35,15 @@ services:
         ipv4_address: 100.64.0.10
       mysql:
         ipv4_address: 100.64.64.131
-    volumes:
+      hub:
+        ipv4_address: 100.64.64.35
+    volumes:      
+      - type: volume
+        source: hb_services_ephemeral
+        target: /anope/data
+        volume:
+          nocopy: false
       - ../config/anope:/anope/conf:ro
+
+volumes:
+  hb_services_ephemeral:

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-I=/sbin/iptables
+I=/usr/sbin/iptables
 
-$I -t nat -D POSTROUTING   -s 100.64.0.0.0/10                                                         -j HB_NAT
+$I -t nat -D POSTROUTING   -s 100.64.0.0/10                                                           -j HB_NAT
 $I        -D INPUT         -s 100.64.0.0/10                                                           -j HB_INPUT   \
           &> /dev/null
 $I        -D INPUT         -d 100.64.0.0/10                                                           -j HB_INPUT   \
@@ -60,4 +60,4 @@ $I        -I FORWARD 1     -d 100.64.0.0/10                                     
 $I        -I OUTPUT 1      -s 100.64.0.0/10                                                           -j HB_OUTPUT
 $I        -I OUTPUT 1      -d 100.64.0.0/10                                                           -j HB_OUTPUT
 
-$I -t nat -I POSTROUTING 1 -s 100.64.0.0.0/10                                                         -j HB_NAT
+$I -t nat -I POSTROUTING 1 -s 100.64.0.0/10                                                           -j HB_NAT

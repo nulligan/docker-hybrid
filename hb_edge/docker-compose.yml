@@ -17,7 +17,7 @@ networks:
         - subnet: 100.64.65.192/29
   hub:
     external:
-      name: hb_hub_edge_leaf
+      name: hb_hub_edge_hub
 
 services:
   edge:

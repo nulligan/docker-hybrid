@@ -1,0 +1,11 @@
+certs
+crl
+crlnumber
+crlnumber.old
+index.txt
+index.txt.attr
+index.txt.attr.old
+index.txt.old
+newcerts
+private
+serial

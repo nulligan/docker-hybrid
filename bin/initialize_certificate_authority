@@ -1,0 +1,193 @@
+#!/bin/bash
+
+if [ "$1" != "-f" ]; then
+    echo "please specify -f when running this command, doing so will DESTROY any existing certificates and keys";
+    echo "exiting without change";
+    exit 1;
+fi
+
+COMMON_NAME="n3tw3rk.1ns3cur1ty.c0rp"
+CWD=$(pwd)
+
+rm -f ${CWD}/config/ssl/*/certs/* ${CWD}/config/ssl/*/private/* ${CWD}/config/ssl/*/newcerts/* ${CWD}/config/ssl/*/crl/* ${CWD}/config/ssl/*/*
+
+set -e
+
+chmod -R 700 ${CWD}/config/ssl
+
+touch ${CWD}/config/ssl/{ca,intermediate}/index.txt
+
+echo 1000 > ${CWD}/config/ssl/ca/serial
+echo 1000 > ${CWD}/config/ssl/ca/crlnumber
+echo 1000 > ${CWD}/config/ssl/intermediate/serial
+echo 1000 > ${CWD}/config/ssl/intermediate/crlnumber
+
+# CA
+
+openssl genpkey                                                                                             \
+        -algorithm ED25519                                                                                  \
+        -out "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.ed25519.key"
+
+openssl genpkey                                                                                             \
+        -algorithm ED448                                                                                    \
+        -out "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.ed448.key"
+
+openssl genrsa -out "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.key" 4096
+
+openssl req                                                                                                 \
+        -x509                                                                                               \
+        -new                                                                                                \
+        -extensions v3_ca                                                                                   \
+        -key    "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.ed448.key"                                  \
+        -out    "${CWD}/config/ssl/ca/certs/c4.${COMMON_NAME}.ed448.crt"                                    \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ed448.ext"
+
+openssl req                                                                                                 \
+        -x509                                                                                               \
+        -new                                                                                                \
+        -extensions v3_ca                                                                                   \
+        -key    "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.ed25519.key"                                \
+        -out    "${CWD}/config/ssl/ca/certs/c4.${COMMON_NAME}.ed25519.crt"                                  \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ed25519.ext"
+
+openssl req                                                                                                 \
+        -x509                                                                                               \
+        -new                                                                                                \
+        -extensions v3_ca                                                                                   \
+        -key    "${CWD}/config/ssl/ca/private/c4.${COMMON_NAME}.key"                                        \
+        -out    "${CWD}/config/ssl/ca/certs/c4.${COMMON_NAME}.crt"                                          \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ext"
+
+# Intermediate
+
+openssl genpkey                                                                                             \
+        -algorithm ED25519                                                                                  \
+        -out "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.ed25519.key"
+
+openssl genpkey                                                                                             \
+        -algorithm ED448                                                                                    \
+        -out "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.ed448.key"
+
+openssl genrsa                                                                                              \
+        -out "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.key"                       \
+        4096
+
+openssl req                                                                                                 \
+        -new                                                                                                \
+        -key    "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.ed448.key"              \
+        -out    "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed448.csr"                \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed448.ext"
+
+openssl req                                                                                                 \
+        -new                                                                                                \
+        -key    "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.ed25519.key"            \
+        -out    "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed25519.csr"              \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed25519.ext"
+
+openssl req                                                                                                 \
+        -new                                                                                                \
+        -key    "${CWD}/config/ssl/intermediate/private/1nt3rm3d14t3.${COMMON_NAME}.key"                    \
+        -out    "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.csr"                      \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ext"
+
+openssl ca                                                                                                  \
+        -batch                                                                                              \
+        -extensions v3_intermediate_ca                                                                      \
+        -in "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed448.csr"                    \
+        -out "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed448.crt"                   \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ed448.ext"
+
+openssl ca                                                                                                  \
+        -batch                                                                                              \
+        -extensions v3_intermediate_ca                                                                      \
+        -in "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed25519.csr"                  \
+        -out "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.ed25519.crt"                 \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ed25519.ext"
+
+openssl ca                                                                                                  \
+        -batch                                                                                              \
+        -extensions v3_intermediate_ca                                                                      \
+        -in "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.csr"                          \
+        -out "${CWD}/config/ssl/intermediate/certs/1nt3rm3d14t3.${COMMON_NAME}.crt"                         \
+        -config "${CWD}/config/ssl/ca/ext/c4.${COMMON_NAME}.ext"
+
+# CRL
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed448.ext"                  \
+        -gencrl                                                                                             \
+        -out "${CWD}/config/ssl/intermediate/crl/1nt3rm3d14t3.${COMMON_NAME}.ed448.crl"                     \
+        -extensions crl_ext
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed25519.ext"                \
+        -gencrl                                                                                             \
+        -out "${CWD}/config/ssl/intermediate/crl/1nt3rm3d14t3.${COMMON_NAME}.ed25519.crl"                   \
+        -extensions crl_ext
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ext"                        \
+        -gencrl                                                                                             \
+        -out "${CWD}/config/ssl/intermediate/crl/1nt3rm3d14t3.${COMMON_NAME}.crl"                           \
+        -extensions crl_ext
+
+# OCSP
+
+openssl genpkey                                                                                             \
+        -algorithm ED25519                                                                                  \
+        -out "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.ed25519.key"
+
+openssl genpkey                                                                                             \
+        -algorithm ED448                                                                                    \
+        -out "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.ed448.key"
+
+openssl genrsa                                                                                              \
+        -out "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.key"                               \
+        4096
+
+openssl req                                                                                                 \
+        -config "${CWD}/config/ssl/intermediate/ext/0csp.${COMMON_NAME}.ed25519.ext"                        \
+        -new                                                                                                \
+        -key "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.ed25519.key"                       \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed25519.csr"                         \
+        -extensions server_cert
+
+openssl req                                                                                                 \
+        -config "${CWD}/config/ssl/intermediate/ext/0csp.${COMMON_NAME}.ed448.ext"                          \
+        -new                                                                                                \
+        -key "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.ed448.key"                         \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed448.csr"                           \
+        -extensions server_cert
+
+openssl req                                                                                                 \
+        -config "${CWD}/config/ssl/intermediate/ext/0csp.${COMMON_NAME}.ext"                                \
+        -new                                                                                                \
+        -key "${CWD}/config/ssl/intermediate/private/0csp.${COMMON_NAME}.key"                               \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.csr"                                 \
+        -extensions server_cert
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed25519.ext"                \
+        -extensions 0csp                                                                                    \
+        -notext                                                                                             \
+        -in "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed25519.csr"                          \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed25519.crt"                         \
+        -batch
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ed448.ext"                  \
+        -extensions 0csp                                                                                    \
+        -notext                                                                                             \
+        -in "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed448.csr"                            \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.ed448.crt"                           \
+        -batch
+
+openssl ca                                                                                                  \
+        -config "${CWD}/config/ssl/intermediate/ext/1nt3rm3d14t3.${COMMON_NAME}.ext"                        \
+        -extensions 0csp                                                                                    \
+        -notext                                                                                             \
+        -in "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.csr"                                  \
+        -out "${CWD}/config/ssl/intermediate/certs/0csp.${COMMON_NAME}.crt"                                 \
+        -batch
+
+echo "FINISHED"

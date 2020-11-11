@@ -1,0 +1,29 @@
+table inet hybrid {  
+	chain input {
+          type filter hook input    priority -50;    policy accept;
+          ct state {established, related} counter accept comment "related/established in to docker host";
+          udp sport 53 ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept comment "UDP DNS query from egress (100.64.48.0/20)";
+	}
+
+  chain ct_fwd {
+          ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept comment "internally-routed response to egress";
+          ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept comment "internally-routed response to null-routed";
+          ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept comment "any & !partition response to egress";
+  }
+
+	chain forward {
+          type filter hook forward  priority -50;    policy accept;
+          ct state {established, related}                         jump   ct_fwd;
+          ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept comment "egress (100.64.48.0/20) to internally-routed (100.64.16.0/20)";
+          ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept comment "egress (100.64.48.0/20) to global but not to partition (100.64.0.0/17)";
+          ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept comment "null-routed (100.64.0.0/20) to internally-routed (10.64.16.0/20)";
+          ip saddr 100.64.0.0/20                             counter drop   comment "null-routed (100.64.0.0/20) are null-routed";
+          ip                         daddr    100.64.64.0/20 counter drop   comment "do not forward to general-purpose (100.64.64.0/20)";
+          ip saddr 100.64.64.0/20                            counter drop   comment "do not forward from general-purpose (100.64.64.0/20)";
+	}
+
+	chain output {
+          type filter hook output   priority -50;    policy accept;
+          udp sport 53 ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept  comment "UDP DNS query response to egress (100.64.48.0/20)";
+	}
+}

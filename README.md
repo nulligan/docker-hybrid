@@ -19,6 +19,7 @@ the same ability to shadow ban tor users. Channel maintainers can use modes such
 want to make exceptions to a shadow ban rule, eg: a channel which is +r and has a +e for the registered user: seroquel!*@* )
 
 ### Topology
+![alt text](https://github.com/philoctetes409bc/docker-hybrid/blob/master/doc/Diagram1.png?raw=true)
 
 ### Caveats
 Each site uses a Tor container for resolving DNS internally (in order to mitigate top site discovery as well as for various other optional purposes including

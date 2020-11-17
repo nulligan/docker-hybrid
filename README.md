@@ -2,9 +2,10 @@
 
 ## Overview
 This collection of docker-compose files provides a collection of IRCd configurations and roles for establishing a reliable IRC network in which hubs are able to
-maintain adequate discretion from discovery and DDoS attacks which would have a negative impact on the network overall. It also provides client-access roles which
-discriminate against proxy and RBL blacklisted hosts/networks, but also provides a means in which access can be made available to these types of users without access
-becoming unmanageable. There are three client access roles:
+maintain adequate discretion from discovery and DDoS attacks which would have a negative impact on the network overall. The goal of this project is to establish
+a scalable, resilient IRC network where the responsibility of politics is left to its users on a per-channel basis. This configuration provides client-access roles
+which discriminate against proxy and RBL blacklisted hosts/networks, but also provides a means in which access can be made available to these types of users
+without access becoming unmanageable. There are three client access roles:
 
 - General (RBL discrimination, proxy scanning using HOPM, auto-kills, port 6667/6697.) While hopm and proxy scanners only solve 90% of the problem, a lot of it
 is relieved by allowing users who wish to use proxies and/or Tor to access the network an alternative means to do so
@@ -99,4 +100,9 @@ rules for host configuration to only allow forward from `100.64.16.0/20` to `100
 - host configuration documentation (fix nftables and test, also iptables script)
 - finish certificate generation (copy most of the ca generation script, generate certs for each internal connection. Use ssl volumes script from netwerk to
 create certificate volumes for each service.
+- short documentation regarding satellite SMTP (removing source hosts from headers)
+
+# Future TODO
+- CONFSERV for anope (asterisk)
+- simplify deployment with ansible / docker-machine if possible
 

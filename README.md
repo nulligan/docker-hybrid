@@ -3,7 +3,7 @@
 ## Overview
 This collection of docker-compose files provides a collection of IRCd configurations and roles for establishing a reliable IRC network in which hubs are able to
 maintain adequate discretion from discovery and DDoS attacks which would have a negative impact on the network overall. It also provides client-access roles which
-discriminate against proxy and RBL blacklisted origins, but also provides a means in which access can be made available to these types of users without access
+discriminate against proxy and RBL blacklisted hosts/networks, but also provides a means in which access can be made available to these types of users without access
 becoming unmanageable. There are three client access roles:
 
 - General (RBL discrimination, proxy scanning using HOPM, auto-kills, port 6667/6697.) While hopm and proxy scanners only solve 90% of the problem, a lot of it
@@ -87,4 +87,16 @@ Follow the same steps as the top-site instructions
 Provided that you have started the hb_mysql and hb_postfix roles, you can start anope serivce for nickname and channel registration
 - `docker-compose -f hb_services/docker-compose.yml up -d`
 
+
+# TODO
+- finish adding in oper bouncer
+- add `100.64.16.0/20` target for Tor DNS
+- convert console to `100.64.16.0/20` targets (internally routed) make the console itself use a 100.64.16.0/20 segment as it's default network (update firewall
+rules for host configuration to only allow forward from `100.64.16.0/20` to `100.64.16.0/20`
+- add higher level topology diagram to illustrate top-site and exterior-site topology better (current illustrates full exterior site stack)
+- add credit for lazy links and summarize the history of the idea
+- finish adding hopm
+- host configuration documentation (fix nftables and test, also iptables script)
+- finish certificate generation (copy most of the ca generation script, generate certs for each internal connection. Use ssl volumes script from netwerk to
+create certificate volumes for each service.
 

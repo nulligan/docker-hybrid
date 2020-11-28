@@ -180,11 +180,12 @@ LLMNR=false
 
 ### Hardening 
 #### SSH
+- Install `tor` on your local/workstation and enable it at boot, the default install provides SOCKS4/5, you also need to install `socat`
 - on the newly installed debian host `grep "." /var/lib/tor/ssh/hostname`
 - change your local/workstation `~/.ssh/config` to match the following
 
 ```
-Host hybrid
+Host myhub
     ProxyCommand                 socat - 'SOCKS4A:127.0.0.1:%h:%p,socksport=9050'
     User                         toor
     HostName                     <the .onion address>
@@ -196,7 +197,9 @@ Host hybrid
     ControlPath                  ~/.ssh/ControlMaster-%r-%h.%p
     KbdInteractiveAuthentication no
 ```
-
+- Verify that it can be SSH'd and that the key is correct:
+- `ssh-keyscan myhub`
+- if it's correct, `ssh-keyscan myhub >> ~/.ssh/known_hosts`
 - Verify that you can SSH the host, then in the `/etc/nftables.conf` remove the following line from the INPUT chain
 - `chattr -i /etc/nftables.conf`
 

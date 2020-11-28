@@ -1,6 +1,11 @@
 table inet hybrid {
+  chain POSTROUTING {
+                type nat hook postrouting priority 0; policy accept;
+                oifname "WAN" ip saddr 198.18.48.0/20 counter masquerade comment "masqueraded egress-routed clients"
+        }
+
 	chain input {
-          type filter hook input    priority -50;    policy accept;
+          type filter hook input    priority 0;    policy accept;
           ct state {established, related} counter accept comment "related/established in to docker host";
           udp sport 53 ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept comment "UDP DNS query from egress (100.64.48.0/20)";
 	}
@@ -12,7 +17,7 @@ table inet hybrid {
   }
 
 	chain forward {
-          type filter hook forward  priority -50;    policy accept;
+          type filter hook forward  priority 0;    policy accept;
           ct state {established, related}                         jump   ct_fwd;
           ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept comment "egress (100.64.48.0/20) to internally-routed (100.64.16.0/20)";
           ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept comment "egress (100.64.48.0/20) to global but not to partition (100.64.0.0/17)";
@@ -23,7 +28,7 @@ table inet hybrid {
 	}
 
 	chain output {
-          type filter hook output   priority -50;    policy accept;
+          type filter hook output   priority 0;    policy accept;
           udp sport 53 ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept  comment "UDP DNS query response to egress (100.64.48.0/20)";
 	}
 }

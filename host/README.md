@@ -61,7 +61,7 @@ Host myhub
 - `systemctl start tor`
 - `cp sysctl.conf /etc/`
 - `chattr +i /etc/sysctl.conf`
-- `sysctl -f /etc/sysctl.conf`
+- `/sbin/sysctl -f /etc/sysctl.conf`
 - `cp default/docker /etc/default/docker`
 - `chattr +i /etc/default/docker`
 - `ip link add docker0 type bridge` 
@@ -69,5 +69,68 @@ Host myhub
 - `ip addr add 100.64.63.129/25 dev docker0`
 - `systemctl enable docker`
 - `systemctl start docker`
-- `rm -rf /etc/nftables/*`
-- `cp -rvp nftables/ /etc`
+- create `/etc/systemd/network/50-WAN.link` and add the following
+
+```
+[Match]
+MACAddress=<replace_this_with_the_MAC_address_of_your_WAN_interface>
+
+[Link]
+Description=WAN
+MACAddressPolicy=persistent 
+Name=WAN
+
+```
+#### systemd-networkd address configuration (DHCP)
+- If you need to change this, visit https://www.freedesktop.org/software/systemd/man/systemd.network.html for more information
+
+- create `/etc/systemd/network/51-WAN.network` and add the following
+
+```
+[Match]
+Name=WAN
+
+[Network]
+Description=WAN
+DHCP=yes
+MulticastDNS=false
+LinkLocalAddressing=fallback
+IPv4LLRoute=true
+LLDP=routers-only
+IPv6AcceptRA=true
+IPForward=true
+IPMasquerade=true
+LLMNR=false
+```
+
+#### systemd-networkd address configuration (static)
+- If you need to change this, visit https://www.freedesktop.org/software/systemd/man/systemd.network.html for more information
+
+- create `/etc/systemd/network/51-WAN.network` and add the following
+
+```
+[Match]
+Name=WAN
+
+[Network]
+Description=WAN
+DHCP=no
+Address=192.168.122.88/24
+Gateway=192.168.122.1
+MulticastDNS=false
+LinkLocalAddressing=fallback
+IPv4LLRoute=true
+LLDP=routers-only
+IPv6AcceptRA=true
+IPForward=true
+IPMasquerade=true
+LLMNR=false
+```
+
+- `chattr +i /etc/systemd/network/50-WAN.link`
+- `chattr +i /etc/systemd/network/51-WAN.network`
+- `systemctl enable systemd-networkd`
+- `sync ; sync ; /sbin/reboot -f`
+- Re-SSH the host, CWD to `docker-hybrid/host`
+- `cp nftables/nftables.rules /etc/nftables.conf`
+- `chattr +i /etc/nftables.conf`

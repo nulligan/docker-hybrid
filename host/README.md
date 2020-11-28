@@ -188,7 +188,7 @@ Host hybrid
     ProxyCommand                 socat - 'SOCKS4A:127.0.0.1:%h:%p,socksport=9050'
     User                         toor
     HostName                     <the .onion address>
-    IdentityFile                 ~/.ssh/hybrid
+    IdentityFile                 ~/.ssh/myhub
     IdentitiesOnly               yes
     LogLevel                     DEBUG
     ControlMaster                auto
@@ -201,8 +201,9 @@ Host hybrid
 - `chattr -i /etc/nftables.conf`
 
 ```
-tcp dport 22                                                      counter accept                      comment "SSH to host";
+tcp dport 22                   counter accept                   comment "SSH to host";
 
 ```
+
 - `chattr +i /etc/nftables.conf`
-- `/sbin/nft -f /etc/nftables.conf
+- `/sbin/nft -f /etc/nftables.conf`

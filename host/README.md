@@ -68,6 +68,7 @@ Host myhub
 - `ip link add docker0 type bridge` 
 - `ip link set docker0 up`
 - `ip addr add 100.64.63.129/25 dev docker0`
+
 #### Enable docker service at boot
 - `systemctl enable docker`
 - `systemctl start docker`
@@ -79,7 +80,7 @@ Host myhub
 - `chattr +i /etc/issue.net`
 - `systemctl restart sshd`
 
-#### Boot network configuration
+### Boot network configuration
 - This step ensures that the WAN interface name will match the pre-defined values in the provided nftables scripts
 - create `/etc/systemd/network/50-WAN.link` and add the following
 
@@ -143,10 +144,65 @@ LLMNR=false
 - `chattr +i /etc/systemd/network/50-WAN.link`
 - `chattr +i /etc/systemd/network/51-WAN.network`
 - `systemctl enable systemd-networkd`
+
 #### Top-site nftables
 - `cp nftables/nftables.top_site.rules /etc/nftables.conf`
+
 #### Exterior-site nftables 
 - `cp nftables/nftables.exterior.rules /etc/nftables.conf`
+
 ### *continued*
 - `chattr +i /etc/nftables.conf`
 - reboot (smoke test)
+
+#### Verification
+- Re-SSH the host
+- Check that the interfaces are correctly configured
+
+```
+# ip addr show dev WAN
+2: WAN: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq state UP group default qlen 1000
+    link/ether 52:54:00:38:51:aa brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.88/24 brd 192.168.122.255 scope global WAN
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe38:51aa/64 scope link 
+       valid_lft forever preferred_lft forever
+# ip addr show dev docker0
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:09:a7:68:60 brd ff:ff:ff:ff:ff:ff
+    inet 100.64.63.129/25 brd 100.64.63.255 scope global docker0
+       valid_lft forever preferred_lft forever
+```
+
+- `/sbin/nft list ruleset`
+- `systemctl status tor`
+- `systemctl status docker`
+
+### Hardening 
+#### SSH
+- on the newly installed debian host `grep "." /var/lib/tor/ssh/hostname`
+- change your local/workstation `~/.ssh/config` to match the following
+
+```
+Host hybrid
+    ProxyCommand                 socat - 'SOCKS4A:127.0.0.1:%h:%p,socksport=9050'
+    User                         toor
+    HostName                     <the .onion address>
+    IdentityFile                 ~/.ssh/hybrid
+    IdentitiesOnly               yes
+    LogLevel                     DEBUG
+    ControlMaster                auto
+    ControlPersist               2h
+    ControlPath                  ~/.ssh/ControlMaster-%r-%h.%p
+    KbdInteractiveAuthentication no
+```
+
+- Verify that you can SSH the host, then in the `/etc/nftables.conf` remove the following line from the INPUT chain
+- `chattr -i /etc/nftables.conf`
+
+```
+tcp dport 22                                                      counter accept                      comment "SSH to host";
+
+```
+- `chattr +i /etc/nftables.conf`
+- `/sbin/nft -f /etc/nftables.conf

@@ -2,9 +2,9 @@
 
 ## Debian
 
-### Create VM
+### Create VM (from local computer/workstation)
 - `ssh-keygen -t ed25519 -f ~/.ssh/myhub`
-- Create VM and use public key from `~/.ssh/myhub.pub`
+- Create VM (however you need to) and use public key from `~/.ssh/myhub.pub`
 - `ssh-keyscan <ip_address_of_vm> >> ~/.ssh/known_hosts`
 - create `~/.ssh/config` and add the following 
 
@@ -49,7 +49,8 @@ Host myhub
 - `cd docker-hybrid/host`
 
 ### Packages 
-- `sudo apt -y install docker.io nftables tcpdump mtr tor git`
+- `sudo apt -y install docker.io nftables tcpdump mtr tor git python3-pip`
+- `pip3 install docker-compose`
 
 ### Configuration files
 - `cp tor/torrc /etc/tor/torrc`
@@ -67,8 +68,19 @@ Host myhub
 - `ip link add docker0 type bridge` 
 - `ip link set docker0 up`
 - `ip addr add 100.64.63.129/25 dev docker0`
+#### Enable docker service at boot
 - `systemctl enable docker`
 - `systemctl start docker`
+
+#### Harden SSH daemon
+- `cp ssh/sshd_config /etc/sshd_config`
+- `chattr +i /etc/ssh/sshd_config`
+- `echo "authorized access only" > /etc/issue.net`
+- `chattr +i /etc/issue.net`
+- `systemctl restart sshd`
+
+#### Boot network configuration
+- This step ensures that the WAN interface name will match the pre-defined values in the provided nftables scripts
 - create `/etc/systemd/network/50-WAN.link` and add the following
 
 ```
@@ -130,7 +142,6 @@ LLMNR=false
 - `chattr +i /etc/systemd/network/50-WAN.link`
 - `chattr +i /etc/systemd/network/51-WAN.network`
 - `systemctl enable systemd-networkd`
-- `sync ; sync ; /sbin/reboot -f`
-- Re-SSH the host, CWD to `docker-hybrid/host`
 - `cp nftables/nftables.rules /etc/nftables.conf`
 - `chattr +i /etc/nftables.conf`
+- reboot (smoke test)

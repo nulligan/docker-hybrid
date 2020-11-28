@@ -1,4 +1,4 @@
-table ip hybrid {
+table ip filter {
   chain POSTROUTING {
     type nat hook postrouting priority 0; policy accept;
     oifname "WAN" ip saddr 198.18.48.0/20 counter masquerade comment "masqueraded egress-routed clients";
@@ -44,13 +44,13 @@ table ip hybrid {
     limit rate 15/second burst 3 packets               counter log prefix "NFFWD: " comment "forward unmatched log";
                                                        counter drop                 comment "forward dropped";
   }
-
   chain output {
     type filter hook output   priority 0;    policy drop;
-    ct state invalid                                             counter jump   INVALID       comment "(CT) invalid on OUTPUT chain";
-    udp sport 53 ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept               comment "UDP DNS query response to egress (100.64.48.0/20)";
-    oifname "WAN"                                                counter accept               comment "* via default interface";
-    limit rate 15/second burst 3 packets                         counter log prefix "NFOUT: " comment "output unmatched log";
-                                                                 counter drop                 comment "output dropped";
+    oifname "lo"     ip saddr 127.0.0.0/8 ip daddr 127.0.0.0/8       counter accept               comment "* via loop-back";
+    ct state invalid                                                 counter jump   INVALID       comment "(CT) invalid on OUTPUT chain";
+    udp sport 53     ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept               comment "UDP DNS query response to egress (100.64.48.0/20)";
+    oifname "WAN"                                                    counter accept               comment "* via default interface";
+    limit rate 15/second burst 3 packets                             counter log prefix "NFOUT: " comment "output unmatched log";
+                                                                     counter drop                 comment "output dropped";
   }
 }

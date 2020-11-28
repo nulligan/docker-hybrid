@@ -1,0 +1,28 @@
+Port                            22
+AddressFamily                   any
+ListenAddress                   ::
+HostKey                         /etc/ssh/ssh_host_rsa_key
+HostKey                         /etc/ssh/ssh_host_ecdsa_key
+HostKey                         /etc/ssh/ssh_host_ed25519_key
+LoginGraceTime                  10s
+PermitRootLogin                 yes
+StrictModes                     yes
+MaxAuthTries                    1
+MaxSessions                     5
+PubkeyAuthentication            yes
+AuthorizedKeysFile	            .ssh/authorized_keys
+PasswordAuthentication          no
+PermitEmptyPasswords            no
+ChallengeResponseAuthentication no
+UsePAM                          yes
+AllowAgentForwarding            no
+AllowTcpForwarding              no
+GatewayPorts                    no
+X11Forwarding                   no
+PrintLastLog                    yes
+TCPKeepAlive                    yes
+PermitTunnel                    no
+Banner                          /etc/issue.net
+AcceptEnv                       LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv                       LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv                       LC_IDENTIFICATION LC_ALL

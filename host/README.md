@@ -153,6 +153,7 @@ LLMNR=false
 
 ### *continued*
 - `chattr +i /etc/nftables.conf`
+- `systemctl enable nftables.service`
 - reboot (smoke test)
 
 #### Verification

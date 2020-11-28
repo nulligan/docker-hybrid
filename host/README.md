@@ -139,9 +139,14 @@ IPMasquerade=true
 LLMNR=false
 ```
 
+### *continued*
 - `chattr +i /etc/systemd/network/50-WAN.link`
 - `chattr +i /etc/systemd/network/51-WAN.network`
 - `systemctl enable systemd-networkd`
-- `cp nftables/nftables.rules /etc/nftables.conf`
+#### Top-site nftables
+- `cp nftables/nftables.top_site.rules /etc/nftables.conf`
+#### Exterior-site nftables 
+- `cp nftables/nftables.exterior.rules /etc/nftables.conf`
+### *continued*
 - `chattr +i /etc/nftables.conf`
 - reboot (smoke test)

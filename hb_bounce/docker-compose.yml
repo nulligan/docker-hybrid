@@ -1,0 +1,38 @@
+# 100.64.48.20/30 100.64.66.32/27
+
+version: "3.8"
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.48.20/30
+  hub:
+    external:
+      name: hb_hub_bounce
+    
+services:
+  bounce:
+    restart: unless-stopped
+    hostname: b0unc3.n3tw3rk.1ns3cur1ty.c0rp
+    build:
+      context: ../znc
+      dockerfile: Dockerfile
+    image: znc:latest
+    command: "znc -f -r -d /home/znc/.znc"
+    environment:
+      LANG: en_US.utf8
+      TZ: UTC
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    networks:
+      default:
+        ipv4_address: 100.64.48.22
+      hub:
+        ipv4_address: 100.64.64.43
+    volumes:
+      - ../configs/znc/znc.conf:/home/znc/.znc/configs/znc.conf:rw

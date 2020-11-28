@@ -1,0 +1,65 @@
+# 100.64.0.20/30 100.64.66.64/27
+
+version: "3.8"
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 100.64.0.20/30
+  hub:
+    external:
+      name: hb_hub_console
+  edge:
+    external:
+      name: hb_edge_console
+  general:
+    external:
+      name: hb_general_console
+  tor_dmz:
+    external:
+      name: hb_tor_dmz_console
+  proxy_dmz:
+    external:
+      name: hb_proxy_dmz_console
+
+services:
+  console:
+    restart: unless-stopped
+    hostname: console
+    hostname: c0ns0l3.n3tw3rk.1ns3cur1ty.c0rp
+    build:
+      context: ../irssi
+      dockerfile: Dockerfile
+    image: irssi:latest
+    command: "/usr/bin/irssi"
+    environment:
+      LANG: en_US.utf8
+      TZ: UTC
+      TERM: xterm-256color
+      IRCNICK: internal_hub_operator
+      IRCUSER: internal_hub_operator
+      IRCNAME: internal_hub_operator
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 1024000
+        hard: 1024000
+    tty: true
+    stdin_open: true
+    networks:
+      default:
+        ipv4_address: 100.64.0.22
+      hub:
+        ipv4_address: 100.64.64.51
+      edge:
+        ipv4_address: 100.64.65.196
+      general:
+        ipv4_address: 100.64.65.163
+      tor_dmz:
+        ipv4_address: 100.64.65.131
+      proxy_dmz:
+        ipv4_address: 100.64.65.4
+    volumes:
+      - ../config/.irssi/:/home/console/.irssi

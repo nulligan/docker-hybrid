@@ -1,4 +1,4 @@
-table inet hybrid {  
+table inet hybrid {
 	chain input {
           type filter hook input    priority -50;    policy accept;
           ct state {established, related} counter accept comment "related/established in to docker host";

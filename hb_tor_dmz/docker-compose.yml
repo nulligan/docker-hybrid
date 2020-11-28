@@ -25,7 +25,7 @@ networks:
 services:
   tor_dmz:
     restart: unless-stopped
-    hostname: tor-dmz.n3tw3rk.1ns3cur1ty.c0rp
+    hostname: t0r-dmz.n3tw3rk.1ns3cur1ty.c0rp
     build:
       context: ../hybrid
       dockerfile: Dockerfile

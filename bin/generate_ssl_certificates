@@ -1,0 +1,32 @@
+#!/bin/bash
+
+COMMON_NAME="n3tw3rk.1ns3cur1ty.c0rp"
+CWD=$(pwd)
+
+set -e
+
+names = "
+3dg3
+g3n3r4l
+hub
+pr0xy-dmz
+s3rv1c3z
+t0r-3dg3
+t0r-dmz
+h0pm
+p0stf1x
+mysql
+"
+
+for x in $(echo $names | tr ' ' '\n' | grep "."); do
+  openssl genpkey                                                                                             \
+          -algorithm ED25519                                                                                  \
+          -out "${CWD}/config/ssl/intermediate/private/${x}.${COMMON_NAME}.ed25519.key"
+
+  openssl genpkey                                                                                             \
+          -algorithm ED448                                                                                    \
+          -out "${CWD}/config/ssl/intermediate/private/${x}.${COMMON_NAME}.ed448.key"
+
+  openssl genrsa -out "${CWD}/config/ssl/intermediate/private/${x}.${COMMON_NAME}.key" 4096
+
+done

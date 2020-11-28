@@ -1,0 +1,1 @@
+DOCKER_OPTS="--iptables=false --ip-masq=false --bip=100.64.63.129/25 --fixed-cidr=100.64.63.128/25 --default-address-pool base=100.64.15.128/25,size=29"

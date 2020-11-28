@@ -1,0 +1,128 @@
+[ca]
+default_ca                      = CA_Intermediate
+
+[CA_Intermediate]
+unique_subject                  = no
+dir                             = config/ssl/intermediate
+certs                           = $dir/certs
+crl_dir                         = $dir/crl
+new_certs_dir                   = $dir/newcerts
+database                        = $dir/index.txt
+serial                          = $dir/serial
+RANDFILE                        = $dir/private/.rand
+private_key                     = $dir/private/1nt3rm3d14t3.n3tw3rk.1ns3cur1ty.c0rp.ed25519.key
+certificate                     = $dir/certs/1nt3rm3d14t3.n3tw3rk.1ns3cur1ty.c0rp.ed25519.crt
+crlnumber                       = $dir/crlnumber
+crl                             = $dir/crl/1nt3rm3d14t3.n3tw3rk.1ns3cur1ty.c0rp.ed25519.crl
+crl_extensions                  = crl_ext
+default_crl_days                = 3650
+default_md                      = sha512
+name_opt                        = ca_default
+cert_opt                        = ca_default
+default_days                    = 825
+preserve                        = no
+policy                          = policy_loose
+
+
+[CA_default]
+dir                             = config/ssl/ca
+certs                           = $dir/certs
+crl_dir                         = $dir/crl
+new_certs_dir                   = $dir/newcerts
+database                        = $dir/index.txt
+serial                          = $dir/serial
+RANDFILE                        = $dir/private/.rand
+private_key                     = $dir/private/c4.n3tw3rk.1ns3cur1ty.c0rp.ed25519.key
+certificate                     = $dir/certs/c4.n3tw3rk.1ns3cur1ty.c0rp.ed25519.crt
+crlnumber                       = $dir/crlnumber
+crl                             = $dir/crl/c4.n3tw3rk.1ns3cur1ty.c0rp.ed25519.crl
+crl_extensions                  = crl_ext
+default_crl_days                = 3650
+default_md                      = sha512
+name_opt                        = ca_default
+cert_opt                        = ca_default
+default_days                    = 825
+preserve                        = no
+policy                          = policy_strict
+
+[policy_strict]
+countryName                     = match
+stateOrProvinceName             = match
+organizationName                = match
+organizationalUnitName          = optional
+commonName                      = supplied
+emailAddress                    = optional
+
+[policy_loose]
+countryName                     = optional
+stateOrProvinceName             = optional
+localityName                    = optional
+organizationName                = optional
+organizationalUnitName          = optional
+commonName                      = supplied
+emailAddress                    = optional
+
+[req]
+prompt                          = no
+default_bits                    = 4096
+distinguished_name              = req_distinguished_name
+string_mask                     = utf8only
+default_md                      = sha512
+x509_extensions                 = v3_ca
+
+[req_distinguished_name]
+countryName                     = XY
+stateOrProvinceName             = Nowhere
+localityName                    = Village
+0.organizationName              = n3tw3rk
+organizationalUnitName          = c3rt1f1c4t3 4uth0r1ty
+commonName                      = h0pm.n3tw3rk.1ns3cur1ty.c0rp
+emailAddress                    = commodus@n3tw3rk.1ns3cur1ty.c0rp
+
+[v3_ca]
+subjectKeyIdentifier            = hash
+authorityKeyIdentifier          = keyid:always,issuer
+basicConstraints                = critical, CA:true
+keyUsage                        = critical, digitalSignature, cRLSign, keyCertSign
+
+[v3_intermediate_ca]
+subjectKeyIdentifier            = hash
+authorityKeyIdentifier          = keyid:always,issuer
+basicConstraints                = critical, CA:true, pathlen:0
+keyUsage                        = critical, digitalSignature, cRLSign, keyCertSign
+crlDistributionPoints           = @crl_info
+authorityInfoAccess             = @ocsp_info
+
+[usr_cert]
+basicConstraints                = CA:FALSE
+nsCertType                      = client, email
+nsComment                       = "n3tw3rk cl13nt c3rt1f1c4t3"
+subjectKeyIdentifier            = hash
+authorityKeyIdentifier          = keyid,issuer
+keyUsage                        = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage                = clientAuth, emailProtection
+
+[server_cert]
+basicConstraints                = CA:FALSE
+nsCertType                      = server
+nsComment                       = "n3tw3rk s3rv3r c3rt1f1c4t3"
+subjectKeyIdentifier            = hash
+authorityKeyIdentifier          = keyid,issuer:always
+keyUsage                        = critical, digitalSignature, keyEncipherment
+extendedKeyUsage                = serverAuth
+
+[crl_ext]
+authorityKeyIdentifier          = keyid:always
+
+[ocsp]
+basicConstraints                = CA:FALSE
+subjectKeyIdentifier            = hash
+authorityKeyIdentifier          = keyid,issuer
+keyUsage                        = critical, digitalSignature
+extendedKeyUsage                = critical, OCSPSigning
+
+[alt_names]
+DNS.1                           = h0pm.n3tw3rk.1ns3cur1ty.c0rp
+DNS.2                           = h0pm
+IP.1                            =
+

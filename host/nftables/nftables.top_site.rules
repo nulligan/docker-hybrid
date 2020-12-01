@@ -1,56 +1,48 @@
-table ip filter {
-  chain POSTROUTING {
-    type nat hook postrouting priority 0; policy accept;
-    oifname "WAN" ip saddr 198.18.48.0/20 counter masquerade comment "masqueraded egress-routed clients";
-  }
+table ip hybrid {
+        chain POSTROUTING {
+          type nat hook postrouting priority 0; policy accept;
+          oifname "WAN" ip saddr 100.64.48.0/20 counter masquerade comment "masqueraded egress-routed clients";
+        }
 
-  chain PREROUTING {
-  }
+        chain PREROUTING {
+        }
 }
 
-  table inet filter {
-    chain INVALID {
-    limit rate 2/second burst 3 packets counter log  prefix "NFBAD: " comment "invalid logged";
-                                        counter drop                  comment "invalid dropped";
-  }
+table inet filter {
+        chain INVALID {
+                limit rate 2/second burst 3 packets counter log  prefix "NFBAD: " comment "invalid logged";
+                                                    counter drop                  comment "invalid dropped";
+        }
 
-  chain input {
-    type filter hook input    priority 0;    policy drop;
-    ct state invalid                                                  counter jump   INVALID              comment "(CT) invalid on INPUT chain";
-    iifname "lo"      ip saddr 127.0.0.0/8    ip daddr 127.0.0.0/8    counter accept                      comment "anything in via loop-back";
-    ct state {established, related} counter accept                                                        comment "related/established in to docker host";
-    tcp dport 22                                                      counter accept                      comment "SSH to host"; 
-    udp sport 53      ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept                      comment "UDP DNS query from egress (100.64.48.0/20)";
-    limit rate 15/second burst 3 packets                              counter        log prefix "NF_IN: " comment "input unmatched log";
-                                                                      counter drop                        comment "input dropped";
-  }
+        chain input {
+          type filter hook input    priority 0;    policy drop;
+          ct state invalid                                                  counter jump   INVALID              comment "Invalid";
+          iifname "lo"      ip saddr 127.0.0.0/8    ip daddr 127.0.0.0/8    counter accept                      comment "Host loop-back";
+          ct state {established, related} counter accept                                                        comment "Related/Established";
+          tcp dport 22                                                      counter accept                      comment "SSH in to host"; 
+          udp dport 53      ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept                      comment "ER->Host DNS (53) UDP";
+          limit rate 15/second burst 3 packets                              counter        log prefix "NF_IN: " comment "input unmatched log";
+                                                                            counter drop                        comment "input dropped";
+        }
 
-  chain ct_fwd {
-    ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept comment "internally-routed response to egress";
-    ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept comment "internally-routed response to null-routed";
-    ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept comment "any & !partition response to egress";
-  }
+        chain forward {
+          type filter hook forward  priority 0;    policy drop;
+          ct state invalid                                   counter jump   INVALID       comment "Invalid";
+          ct state { established, related }                          accept               comment "Related/Established";
+          ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "ER->IR";
+          ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "NR->IR";
+          ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "ER->!partition";
+          limit rate 15/second burst 3 packets               counter log prefix "NFFWD: " comment "forward unmatched log";
+                                                             counter drop                 comment "forward dropped";
+        }
 
-  chain forward {
-    type filter hook forward  priority 0;    policy drop;
-    ct state invalid                                   counter jump   INVALID       comment "(CT) invalid on FORWARD chain";
-    ct state { established, related }                          jump   ct_fwd        comment "jump to CT forward chain";
-    ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "egress (100.64.48.0/20) to internally-routed (100.64.16.0/20)";
-    ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "egress (100.64.48.0/20) to global but not to partition (100.64.0.0/17)";
-    ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "null-routed (100.64.0.0/20) to internally-routed (10.64.16.0/20)";
-    ip saddr 100.64.0.0/20                             counter drop                 comment "null-routed (100.64.0.0/20) are null-routed";
-    ip                         daddr    100.64.64.0/20 counter drop                 comment "do not forward to general-purpose (100.64.64.0/20)";
-    ip saddr 100.64.64.0/20                            counter drop                 comment "do not forward from general-purpose (100.64.64.0/20)";
-    limit rate 15/second burst 3 packets               counter log prefix "NFFWD: " comment "forward unmatched log";
-                                                       counter drop                 comment "forward dropped";
-  }
-  chain output {
-    type filter hook output   priority 0;    policy drop;
-    oifname "lo"     ip saddr 127.0.0.0/8 ip daddr 127.0.0.0/8       counter accept               comment "* via loop-back";
-    ct state invalid                                                 counter jump   INVALID       comment "(CT) invalid on OUTPUT chain";
-    udp sport 53     ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept               comment "UDP DNS query response to egress (100.64.48.0/20)";
-    oifname "WAN"                                                    counter accept               comment "* via default interface";
-    limit rate 15/second burst 3 packets                             counter log prefix "NFOUT: " comment "output unmatched log";
-                                                                     counter drop                 comment "output dropped";
-  }
+        chain output {
+          type filter hook output   priority 0;    policy drop;
+          oifname "lo" ip                   saddr 127.0.0.0/8 ip daddr 127.0.0.0/8       counter accept               comment "Host loop-back";
+          ct state invalid                                                               counter jump   INVALID       comment "Invalid";
+          oifname "WAN"                                                                  counter accept               comment "Default out (WAN)";
+          oifname "docker0"                                                              counter accept               comment "Any out on docker0";
+          limit rate 15/second burst 3 packets                                           counter log prefix "NFOUT: " comment "output unmatched log";
+                                                                                         counter drop                 comment "output dropped";
+        }
 }

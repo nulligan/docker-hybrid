@@ -1,44 +1,53 @@
 servers = (
   {
-    address = "hub";
+    address = "100.64.64.50";
     chatnet = "hub";
-    port = "6667";
+    port = "6665";
     password = "password";
     use_tls = "no";
     tls_verify = "no";
     autoconnect = "yes";
   },
   {
-    address = "general";
+    address = "100.64.65.162";
     chatnet = "general";
-    port = "6667";
+    port = "6665";
     password = "password";
     use_tls = "no";
     tls_verify = "no";
     autoconnect = "yes";
   },
   {
-    address = "198.18.70.58";
-    chatnet = "tor-dmz";
-    port = "6667";
+    address = "100.64.65.130";
+    chatnet = "tor_dmz";
+    port = "6665";
     password = "password";
     use_tls = "no";
     tls_verify = "no";
     autoconnect = "yes";
   },
   {
-    address = "198.18.70.66";
-    chatnet = "proxy-dmz";
-    port = "6667";
+    address = "100.64.65.3";
+    chatnet = "proxy_dmz";
+    port = "6665";
     password = "password";
     use_tls = "no";
     tls_verify = "no";
     autoconnect = "yes";
   },
   {
-    address = "edge";
+    address = "100.64.65.195";
     chatnet = "edge";
-    port = "6667";
+    port = "6665";
+    password = "password";
+    use_tls = "no";
+    tls_verify = "no";
+    autoconnect = "yes";
+  },
+  {
+    address = "100.64.66.2";
+    chatnet = "edge";
+    port = "6665";
     password = "password";
     use_tls = "no";
     tls_verify = "no";
@@ -68,30 +77,36 @@ chatnets = {
     type = "IRC";
     autosendcmd = "/oper general_admin password";
   };
-  tordmz = {
+  tor_dmz = {
     nick = "tor_dmz_admin";
     username = "tdmzadmin";
     realname = "tor dmz admin";
     type = "IRC";
     autosendcmd = "/oper tor_dmz_admin password";
   };
-  prxdmz = {
+  tor_edge = {
+    nick = "tor_dmz_admin";
+    username = "tdmzadmin";
+    realname = "tor dmz admin";
+    type = "IRC";
+    autosendcmd = "/oper tor_dmz_admin password";
+  };
+  proxy_dmz = {
     nick = "proxy_dmz_admin";
     username = "pdmzadmin";
     realname = "tor dmz admin";
     type = "IRC";
     autosendcmd = "/oper proxy_dmz_admin password";
   };
-  "tor-dmz" = { type = "IRC"; };
-  "proxy-dmz" = { type = "IRC"; };
 };
 
 channels = (
   { name = "#partyline"; chatnet = "hub"; autojoin = "yes"; },
   { name = "#partyline"; chatnet = "edge"; autojoin = "yes"; },
   { name = "#partyline"; chatnet = "general"; autojoin = "yes"; },
-  { name = "#partyline"; chatnet = "tordmz"; autojoin = "yes"; },
-  { name = "#partyline"; chatnet = "prxdmz"; autojoin = "yes"; }
+  { name = "#partyline"; chatnet = "tor_dmz"; autojoin = "yes"; },
+  { name = "#partyline"; chatnet = "proxy_dmz"; autojoin = "yes"; },
+  { name = "#partyline"; chatnet = "tor_edge"; autojoin = "yes"; }
 );
 
 aliases = {

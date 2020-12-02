@@ -23,6 +23,9 @@ networks:
   proxy_dmz:
     external:
       name: hb_proxy_dmz_console
+  tor_edge:
+    external:
+      name: hb_tor_edge_console
 
 services:
   console:
@@ -61,5 +64,7 @@ services:
         ipv4_address: 100.64.65.131
       proxy_dmz:
         ipv4_address: 100.64.65.4
+      tor_edge:
+        ipv4_address: 100.64.66.2
     volumes:
-      - ../config/.irssi/:/home/console/.irssi
+      - ../config/irssi/:/home/console/.irssi

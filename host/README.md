@@ -44,13 +44,13 @@ Host myhub
 
 - `ssh myhub`
 
-### Repo 
-- `git clone https://github.com/philoctetes409bc/docker-hybrid.git`
-- `cd docker-hybrid/host`
-
 ### Packages 
 - `sudo apt -y install docker.io nftables tcpdump mtr tor git python3-pip`
 - `pip3 install docker-compose`
+
+### Repo 
+- `git clone https://github.com/philoctetes409bc/docker-hybrid.git`
+- `cd docker-hybrid/host`
 
 ### Configuration files
 - `cp tor/torrc /etc/tor/torrc`

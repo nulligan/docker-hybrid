@@ -37,7 +37,7 @@ are provided in https://github.com/philoctetes409bc/docker-hybrid/host/README.md
 
 ### Build images
 ```
-for x in $(ls -1 | grep hb_); do                                                                                                                                    ─╯
+for x in $(ls -1 | grep hb_); do
   docker-compose -f $x/docker-compose.yml build;
 done
 ```

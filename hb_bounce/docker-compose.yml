@@ -35,4 +35,4 @@ services:
       hub:
         ipv4_address: 100.64.64.43
     volumes:
-      - ../configs/znc/znc.conf:/home/znc/.znc/configs/znc.conf:rw
+      - ../config/znc/znc.conf:/home/znc/.znc/configs/znc.conf:rw

@@ -1,48 +1,50 @@
 table ip hybrid {
+
         chain POSTROUTING {
-          type nat hook postrouting priority 0; policy accept;
+          type nat hook postrouting priority 100; policy accept;
           oifname "WAN" ip saddr 100.64.48.0/20 counter masquerade comment "masqueraded egress-routed clients";
         }
 
         chain PREROUTING {
-          iif "WAN" tcp dport { 6667, 6697 } counter dnat 100.64.48.10      comment "general access leaf";
+          type nat hook prerouting priority -100;
+          iif "WAN" tcp dport { 6667 6697 }  counter dnat 100.64.48.10      comment "general access leaf";
           iif "WAN" tcp dport { 6668, 6698 } counter dnat 100.64.48.18      comment "proxy dmz access leaf";
           iif "WAN" tcp dport { 7777 }       counter dnat 100.64.48.14:6667 comment "edge uplink hub";
           iif "WAN" tcp dport { 7797 }       counter dnat 100.64.48.14:6697 comment "TLS edge uplink hub";
           iif "WAN" tcp dport { 6666 }       counter dnat 100.64.48.22:6667 comment "oper bouncer";
-          iif "WAN" tcp dport { 6696 }       counter dnat 100.64.48.22:6667 comment "TLS oper bouncer";
+          iif "WAN" tcp dport { 6696 }       counter dnat 100.64.48.22:6697 comment "TLS oper bouncer";
         }
-}
 
-table inet filter {
         chain INVALID {
                 limit rate 2/second burst 3 packets counter log  prefix "NFBAD: " comment "invalid logged";
                                                     counter drop                  comment "invalid dropped";
         }
 
-        chain input {
+        chain INPUT {
           type filter hook input    priority 0;    policy drop;
           ct state invalid                                                  counter jump   INVALID              comment "Invalid";
           iifname "lo"      ip saddr 127.0.0.0/8    ip daddr 127.0.0.0/8    counter accept                      comment "Host loop-back";
           ct state {established, related} counter accept                                                        comment "Related/Established";
-          tcp dport 22                                                      counter accept                      comment "SSH in to host"; 
+          tcp dport 22                                                      counter accept                      comment "SSH in to host";
+          tcp dport { 6667, 6697, 6668, 6698, 7777, 7797, 6666, 6696 }      counter accept                      comment "IRCd ervice ports";
           udp dport 53      ip saddr 100.64.48.0/20 ip daddr 100.64.48.0/20 counter accept                      comment "ER->Host DNS (53) UDP";
           limit rate 15/second burst 3 packets                              counter        log prefix "NF_IN: " comment "input unmatched log";
                                                                             counter drop                        comment "input dropped";
         }
 
-        chain forward {
+        chain FORWARD {
           type filter hook forward  priority 0;    policy drop;
-          ct state invalid                                   counter jump   INVALID       comment "Invalid";
-          ct state { established, related }                          accept               comment "Related/Established";
-          ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "ER->IR";
-          ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "NR->IR";
-          ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "ER->!partition";
-          limit rate 15/second burst 3 packets               counter log prefix "NFFWD: " comment "forward unmatched log";
-                                                             counter drop                 comment "forward dropped";
+          ct state invalid                                      counter jump   INVALID       comment "Invalid";
+          ct state { established, related }                             accept               comment "Related/Established";
+          ip saddr != 100.64.0.0/17  ip daddr    100.64.48.0/20 counter accept               comment "GLOBAL->ER";
+          ip saddr    100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "ER->IR";
+          ip saddr    100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "NR->IR";
+          ip saddr    100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "ER->!partition";
+          limit rate 15/second burst 3 packets                  counter log prefix "NFFWD: " comment "forward unmatched log";
+                                                                counter drop                 comment "forward dropped";
         }
 
-        chain output {
+        chain OUTPUT {
           type filter hook output   priority 0;    policy drop;
           oifname "lo" ip                   saddr 127.0.0.0/8 ip daddr 127.0.0.0/8       counter accept               comment "Host loop-back";
           ct state invalid                                                               counter jump   INVALID       comment "Invalid";

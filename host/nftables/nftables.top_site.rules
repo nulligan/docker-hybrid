@@ -1,20 +1,20 @@
 table ip hybrid {
+
         chain POSTROUTING {
-          type nat hook postrouting priority 0; policy accept;
+          type nat hook postrouting priority 100; policy accept;
           oifname "WAN" ip saddr 100.64.48.0/20 counter masquerade comment "masqueraded egress-routed clients";
         }
 
         chain PREROUTING {
+          type nat hook prerouting priority -100;
         }
-}
 
-table inet filter {
         chain INVALID {
                 limit rate 2/second burst 3 packets counter log  prefix "NFBAD: " comment "invalid logged";
                                                     counter drop                  comment "invalid dropped";
         }
 
-        chain input {
+        chain INPUT {
           type filter hook input    priority 0;    policy drop;
           ct state invalid                                                  counter jump   INVALID              comment "Invalid";
           iifname "lo"      ip saddr 127.0.0.0/8    ip daddr 127.0.0.0/8    counter accept                      comment "Host loop-back";
@@ -25,18 +25,19 @@ table inet filter {
                                                                             counter drop                        comment "input dropped";
         }
 
-        chain forward {
+        chain FORWARD {
           type filter hook forward  priority 0;    policy drop;
-          ct state invalid                                   counter jump   INVALID       comment "Invalid";
-          ct state { established, related }                          accept               comment "Related/Established";
-          ip saddr 100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "ER->IR";
-          ip saddr 100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "NR->IR";
-          ip saddr 100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "ER->!partition";
-          limit rate 15/second burst 3 packets               counter log prefix "NFFWD: " comment "forward unmatched log";
-                                                             counter drop                 comment "forward dropped";
+          ct state invalid                                      counter jump   INVALID       comment "Invalid";
+          ct state { established, related }                             accept               comment "Related/Established";
+          ip saddr != 100.64.0.0/17  ip daddr    100.64.48.0/20 counter accept               comment "GLOBAL->ER";
+          ip saddr    100.64.48.0/20 ip daddr    100.64.16.0/20 counter accept               comment "ER->IR";
+          ip saddr    100.64.0.0/20  ip daddr    100.64.16.0/20 counter accept               comment "NR->IR";
+          ip saddr    100.64.48.0/20 ip daddr != 100.64.0.0/17  counter accept               comment "ER->!partition";
+          limit rate 15/second burst 3 packets                  counter log prefix "NFFWD: " comment "forward unmatched log";
+                                                                counter drop                 comment "forward dropped";
         }
 
-        chain output {
+        chain OUTPUT {
           type filter hook output   priority 0;    policy drop;
           oifname "lo" ip                   saddr 127.0.0.0/8 ip daddr 127.0.0.0/8       counter accept               comment "Host loop-back";
           ct state invalid                                                               counter jump   INVALID       comment "Invalid";
